@@ -3,31 +3,19 @@
 #define BLYNK_PRINT Serial
 #include <ESP8266WiFi.h>
 #include <BlynkSimpleEsp8266.h>
-
 static const int RXPin = 4, TXPin = 5;   
 static const uint32_t GPSBaud = 9600; 
-
 TinyGPSPlus gps; 
 WidgetMap myMap(V0); 
-
 SoftwareSerial ss(RXPin, TXPin);  
-
 BlynkTimer timer;
-
 float spd;       
 float sats;      
 String bearing;  
-
 char auth[] = "<AuthenticationKeyFromBlynk>";              
 char ssid[] = "<Wi-Fi SSID>";                                       
 char pass[] = "<Password>";                                     
-
-
-
-
-//unsigned int move_index;         
 unsigned int move_index = 1;       
-
 void setup()
 {
   Serial.begin(115200);
@@ -36,7 +24,6 @@ void setup()
   Blynk.begin(auth, ssid, pass);
   timer.setInterval(5000L, checkGPS); 
 }
-
 void checkGPS(){
   if (gps.charsProcessed() < 10)
   {
@@ -44,20 +31,16 @@ void checkGPS(){
       Blynk.virtualWrite(V4, "ERROR in GPS"); 
   }
 }
-
 void loop()
 {
- 
   while (ss.available() > 0) 
   {
-     
       if (gps.encode(ss.read()))
         displayInfo();
   }
   Blynk.run();
   timer.run();
 }
-
 void displayInfo()
 { 
 
@@ -71,17 +54,13 @@ void displayInfo()
     Serial.println(latitude, 6);  
     Serial.print("LONG: ");
     Serial.println(longitude, 6);
-    
     Blynk.virtualWrite(V1, String(latitude, 6));   
     Blynk.virtualWrite(V2, String(longitude, 6));  
-    
     myMap.location(move_index, latitude, longitude, "GPS_Location");
     spd = gps.speed.kmph();               
        Blynk.virtualWrite(V3, spd);
-     
        sats = gps.satellites.value();   
        Blynk.virtualWrite(V4, sats);
-       
        bearing = TinyGPSPlus::cardinal(gps.course.value()); 
        Blynk.virtualWrite(V5, bearing);               
   }
